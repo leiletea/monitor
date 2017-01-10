@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>监测平台</title>
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/stylesheets/style.css" rel="stylesheet" type="text/css"/>
+    <script src="/javascripts/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            loadData();
+        });
+        function loadData() {
+            //ajax加载数据
+            $.get("/monitorItem/queryAll", function (result) {
+                if (result) {
+                    //渲染数据
+                    var tbody = $("#monitorItemTable tbody");
+                    var monitorItems = result;
+                    if (monitorItems) {
+                        tbody.empty();
+                        var temp = "";
+                        for (var i in monitorItems) {
+                            temp += "<tr>";
+                            temp += "<td>" + monitorItems[i].id + "</td>";
+                            temp += "<td>" + monitorItems[i].name + "</td>";
+                            temp += "<td>" + monitorItems[i].port + "</td>";
+                            temp += "<td>" + monitorItems[i].runCmd + "</td>";
+                            temp += "</tr>";
+                        }
+                        tbody.append(temp);
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+<table id="monitorItemTable" class="table table-hover">
+    <caption>监测项目</caption>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>名称</th>
+        <th>端口</th>
+        <th>启动命令</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>监测平台</title>
+    <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/stylesheets/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/stylesheets/myPage.css" rel="stylesheet" type="text/css"/>
+    <script src="/javascripts/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script src="/javascripts/jqPaginator.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            loadData();
+        });
+        var pageOptions = {
+            totalPages: 0,
+            totalCounts: 0,
+            pageSize: 20,
+            currentPage: 1,
+            visiblePages: 5
+        };
+        function loadData() {
+            //ajax加载数据
+            $.get("/monitor/queryPage?ps=" + pageOptions.pageSize + "&cp=" + pageOptions.currentPage, function (result) {
+                if (result) {
+                    pageOptions.totalCounts = result.total;
+                    loadPage();
+                        //渲染数据
+                        var tbody = $("#monitorTable tbody");
+                        var monitors = result.items;
+                        if (monitors) {
+                        tbody.empty();
+                        var temp = "";
+                        for (var i in monitors) {
+                            temp += "<tr>";
+                            temp += "<td>" + monitors[i].id + "</td>";
+                            temp += "<td>" + monitors[i].name + "</td>";
+                            if (monitors[i].state == 1) {
+                                temp += "<td>运行中</td>";
+                              //  temp += "<td></td>";
+                                //temp += "<td><input type=\"button\" value='中止' onclick='javascript:startService(" + monitors[i].itemId + ")'></td>";
+                            } else {
+                                temp += "<td>停止中</td>";
+                             //   temp += "<td><input type=\"button\" value='启动' onclick='javascript:startService(" + monitors[i].itemId + ")'></td>";
+                            }
+                            temp += "<td>" + (monitors[i].cpu ? monitors[i].cpu : "") + "</td>";
+                            temp += "<td>" + (monitors[i].memory ? monitors[i].memory : "") + "</td>";
+                            temp += "</tr>";
+                        }
+                        tbody.append(temp);
+                    }
+                }
+            });
+        }
+        function stopService(id) {
+            alert(id);
+        }
+        function startService(id) {
+            $.post("/monitorItem/runService", {id: id}, function (data) {
+                alert(data.msg);
+            });
+        }
+        function loadPage() {
+            var totalCounts = pageOptions.totalCounts;
+            var pageSize = pageOptions.pageSize;
+            var totalPages = totalCounts % pageSize > 0 ? (totalCounts / pageSize) + 1 : (totalCounts / pageSize);
+            pageOptions.totalPages = totalPages;
+
+            jQuery.extend(pageOptions, {
+                first: '<li class="first"><a href="javascript:;">首页</a></li>',
+                prev: '<li class="prev"><a href="javascript:;"><i class="arrow arrow2"></i>上一页</a></li>',
+                next: '<li class="next"><a href="javascript:;">下一页<i class="arrow arrow3"></i></a></li>',
+                last: '<li class="last"><a href="javascript:;">末页</a></li>',
+                page: '<li class="page"><a href="javascript:;">{{page}}</a></li>',
+                onPageChange: function (num, type) {
+                    if (type == "change") {
+                        pageOptions.currentPage = num;
+                        loadData();
+                    }
+                }
+            });
+
+            $.jqPaginator('#pagination', pageOptions);
+        }
+    </script>
+</head>
+<body>
+<table id="monitorTable" class="table table-hover">
+    <caption>监测信息</caption>
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>名称</th>
+        <th>运行情况</th>
+        <!--<th>操作</th>-->
+        <th>占用cpu(%)</th>
+        <th>占用内存</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+<div class="right">
+    <ul class="pagination" id="pagination">
+    </ul>
+</div>
+</body>
+</html>
